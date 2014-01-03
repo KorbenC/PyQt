@@ -1,44 +1,62 @@
 #!/usr/bin/env python
 
 from PyQt4 import QtCore, QtGui
+from PyQt4.QtGui import *
 
-#MainWindow class 
+#MainWindow class
 class MainWindow(QtGui.QMainWindow):
 	def __init__(self):
-		super(MainWindow, self).__init__()
+		QtGui.QMainWindow.__init__(self)
 
 		widget = QtGui.QWidget()
 		self.setCentralWidget(widget)
 
-		topFiller = QtGui.QWidget()
-		topFiller.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+		self.setWindowTitle("File Explorer")
+		self.setMinimumSize(160,160)
+		self.resize(700,600)
 
-		bottomFiller = QtGui.QWidget()
-		bottomFiller.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-
-		vbox = QtGui.QVBoxLayout()
-		vbox.setMargin(5)
-		vbox.addWidget(topFiller)
-		vbox.addWidget(bottomFiller)
-		widget.setLayout(vbox)
+		#create File System tree
+		self.treeView = QTreeView()
+		self.fileSystemModel = QFileSystemModel(self.treeView)
+		self.fileSystemModel.setReadOnly(False)
+		root = self.fileSystemModel.setRootPath("/")
+		self.treeView.setModel(self.fileSystemModel)
+		self.treeView.setRootIndex(root)
+		#Create Layout
+		Layout = QtGui.QVBoxLayout()
+		Layout.addWidget(self.treeView)
+		widget.setLayout(Layout)
 
 		self.createActions()
 		self.createMenus()
+		self.createStatusBar()
 
-		message = 'Status text'
-		self.statusBar().showMessage(message)
 
-		self.setWindowTitle("File Explorer")
-		self.setMinimumSize(160,160)
-		self.resize(480,320)
-	#Actions for menu buttons	
+	def createStatusBar(self):
+	    self.statusBar().showMessage("Ready")
+
+	def about(self):
+		QtGui.QMessageBox.about(self, "About File Explorer",
+			"Version 1.0\n"
+			"Copyright 2014 Korben Carreno\n"
+			"Example of a File Explorer")
+
+	#Actions for menu buttons
 	def createActions(self):
 		self.newAct = QtGui.QAction("&New", self, shortcut=QtGui.QKeySequence.New, statusTip="Create a new file")
-	#Menus 
+		self.exitAct = QtGui.QAction("E&xit", self, shortcut="Ctrl+Q", statusTip="Exit the application", triggered=self.close)
+		self.aboutAct = QtGui.QAction("&About", self,statusTip="About File Explorer", triggered=self.about)
+		self.aboutQtAct = QtGui.QAction("About &Qt", self,statusTip="About Qt library", triggered=QtGui.qApp.aboutQt)
+	#Menus
 	def createMenus(self):
 		self.fileMenu = self.menuBar().addMenu("&File")
 		self.fileMenu.addAction(self.newAct)
+		self.fileMenu.addSeparator()
+		self.fileMenu.addAction(self.exitAct)
 
+		self.helpMenu = self.menuBar().addMenu("&Help")
+		self.helpMenu.addAction(self.aboutAct)
+		self.helpMenu.addAction(self.aboutQtAct)
 
 
 #main
